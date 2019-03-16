@@ -9,8 +9,8 @@
     >
       <!-- 主页头像内容 -->
       <div slot="left" style="margin-left:-10px;margin-top:-10px">
-        <span @click="showSide" v-show="true">
-          <avatar fullname="My Sticker" image="https://raw.githubusercontent.com/ssouron/vue-avatar-component/master/img/example3.jpg" :size="40"></avatar>
+        <span @click="showSide" v-show="showUserIcon">
+          <avatar fullname="userName" :image="user.headImg" :size="40"></avatar>
         </span>
         <!-- <x-button type="default" text>submit</x-button> -->
         <a style="margin-top:10px;color:green" @click="login" v-show="!showUserIcon">登录</a>
@@ -19,7 +19,7 @@
       <div style="width:100%">
         <input style="width:83%" type="search" class="header_search" id="searchInput" placeholder="输入关键字搜索">
         <div style="float:right;margin-top:8px">
-          <x-icon style="color:black;" type="ios-search-strong" @click="search" size="30"></x-icon>
+          <x-icon style="color:black;" type="ios-search-strong" @click="reloadDiv" size="30"></x-icon>
         </div>
       </div>
       <!-- 菜单内容 -->
@@ -51,9 +51,9 @@
         <!-- 这里才是侧栏代码部分 -->
         <div class="side-content" v-show="isShowside">
           <div class="head" @click="showUserSelf">
-            <avatar fullname="My Sticker" image="https://raw.githubusercontent.com/ssouron/vue-avatar-component/master/img/example3.jpg" :size="80"></avatar>
+            <avatar :fullname="user.userName" :image="user.headImg" :size="80"></avatar>
             <br>
-            <span>小明</span>
+            <span>{{user.userName}}</span>
           </div>
           <div style="text-align:center">
             <el-row>
@@ -104,14 +104,14 @@
                   <!-- 每个小格展示内容 -->
                   <el-card :body-style="{ padding: '0px' }" shadow="always" style="width:100%;height:auto;background:#ffeb3b;padding:0px">
                     <div style="width:50%;margin-left:40%;text-align:center" @click="showUserDetail">
-                      <avatar fullname="My Sticker" image="https://raw.githubusercontent.com/ssouron/vue-avatar-component/master/img/example3.jpg" :size="30"></avatar>
-                      <span style="font-size:2em;">小明</span>
+                      <avatar fullname="My Sticker" :image="item.headImg" :size="30"></avatar>
+                      <span style="font-size:2em;">{{item.userName}}</span>
                     </div>
                     <div ref="cards" style="width:100%;" @click="showMessageDetail">
                       <span style="width:100%;float:left;overflow:hidden;text-overflow: ellipsis;white-space: normal;text-align:left">
                         {{item.messageContent}}
                       </span>
-                      <img src="../assets/one.gif" style="width:100%;display: block;">
+                      <img :src="item.messageImg" style="width:100%;display: block;">
                     </div>
                     <br>
                     <div style="text-align:center;margin-bottom:10px">
@@ -137,9 +137,8 @@
 </template>
 
 <script>
-import {delCookie} from '@/assets/js/cookie.js'
 import {XHeader, XButton} from 'vux'
-import {getAllMessage} from '@/api'
+import {getAllMessage, getUser} from '@/api'
 
 export default {
   components: {
@@ -166,7 +165,7 @@ export default {
         speed: 300,
         loop: true
       },
-      messageList: []
+      messageArrayList: []
     }
   },
   created () {
@@ -182,23 +181,38 @@ export default {
     },
     showUserIcon () {
       return this.$store.getters.isShowUserIcon
+    },
+    messageList () {
+      return this.$store.getters.getMessageList
+    },
+    user () {
+      return this.$store.getters.getUserData
     }
   },
   mounted () {
     /* 页面挂载获取cookie，如果存在username的cookie，则跳转到主页，不需登录 */
-    // if (getCookie('username')) {
-    //   this.$router.push({path: '/'})
-    //   this.$store.dispatch('login')
+    if (localStorage.hasOwnProperty('userName')) {
+      this.$router.push({path: '/'})
+      this.$store.dispatch('login')
+      var userName = localStorage.getItem('userName')
+      getUser(userName).then((response) => {
+        this.$store.commit('setUserData', response.data.data)
+        console.log(response.data.data)
+      })
+    }
+    //  else {
+    //   this.$router.push({path: '/login'})
     // }
-    this.search()
+    this.reloadDiv()
   },
   methods: {
     getData () {
       getAllMessage().then((response) => {
-        this.messageList = response.data.data
-        for (var i in this.messageList) {
-          this.$set(this.messageList[i], 'height', 300)
+        var messageList = response.data.data
+        for (var i in messageList) {
+          this.$set(messageList[i], 'height', 300)
         }
+        this.$store.commit('setMessageList', messageList)
       })
     },
     login () {
@@ -254,17 +268,18 @@ export default {
       this.hideSide()
       this.$store.dispatch('logout')
       /* 删除cookie */
-      delCookie('username')
+      localStorage.clear()
     },
-    search () {
+    reloadDiv () {
       setTimeout(() => {
         var divHeight = this.$refs.cards
-        for (var i in this.messageList) {
+        var messageList = this.$store.getters.getMessageList
+        for (var i in messageList) {
           var innerDivHeight = divHeight[i].offsetHeight
           var cardDiv = innerDivHeight + 110
-          this.messageList[i].height = cardDiv
+          messageList[i].height = cardDiv
         }
-      }, 500)
+      }, 2000)
     }
   }
 }

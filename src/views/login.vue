@@ -40,7 +40,7 @@
 </template>
 
 <script>
-import {setCookie} from '@/assets/js/cookie.js'
+// import {setCookie} from '@/assets/js/cookie.js'
 import {login, register} from '@/api'
 import {XHeader, Icon} from 'vux'
 
@@ -98,13 +98,14 @@ export default {
               type: 'error',
               center: true
             })
-          } else if (response.data.code === '2') {
+          } else if (response.data.code === 2) {
             this.$message({
               message: '欢迎管理员!',
               type: 'success',
               center: true
             })
-            setCookie('userName', this.userName, 99 * 365 * 24 * 3600)
+            localStorage.setItem('userName', this.userName)
+            this.$store.commit('setUserData', response.data.data)
             setTimeout(function () {
               this.$router.push({path: '/'})
               this.$store.dispatch('login')
@@ -117,7 +118,8 @@ export default {
               type: 'success',
               center: true
             })
-            setCookie('userName', this.userName, 99 * 365 * 24 * 3600)
+            localStorage.setItem('userName', this.userName)
+            this.$store.commit('setUserData', response.data.data)
             setTimeout(function () {
               this.$router.push({path: '/'})
               this.$store.dispatch('login')

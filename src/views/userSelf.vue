@@ -6,9 +6,9 @@
       <x-icon slot="overwrite-left" type="ios-arrow-back" size="30" style="fill:#fff;position:relative;top:-8px;left:-3px;" @click="backspace"></x-icon>
     </x-header>
     <div style="height:auto;background:#edff008a;text-align:center;padding:10px">
-      <avatar style="margin-top:50px" fullname="My Sticker" image="https://raw.githubusercontent.com/ssouron/vue-avatar-component/master/img/example3.jpg" :size="150"></avatar>
+      <avatar style="margin-top:50px" :fullname="user.userName" :image="user.headImg" :size="150"></avatar>
       <br>
-      <span style="font-size:24px">小明</span>
+      <span style="font-size:24px">{{user.userName}}</span>
       <br>
       <el-button type= "text" style="float:right;color:#000000;width:33px" @click="editUser">修改</el-button>
       <br>
@@ -61,6 +61,11 @@ export default {
   name: 'userSelf',
   data () {
     return {
+    }
+  },
+  computed: {
+    user () {
+      return this.$store.getters.getUserData
     }
   },
   methods: {

@@ -6,7 +6,7 @@
     </div>
     <br><br>
     <div  @click="imgClick">
-      <avatar style="margin-top:20px" fullname="My Sticker" image="http://nt.com/ssouron/vue-avatar-component/master/img/example3.jpg" :size="150"></avatar>
+      <avatar style="margin-top:20px" :fullname="user.userName" :image="user.headImg" :size="150"></avatar>
     </div>
     <input style="float: left;  display: none;" type="file" id='uploadFile'  accept="image/*"  @change="readLocalFile">
     <br>
@@ -47,6 +47,7 @@ export default {
   name: 'userSelf',
   data () {
     return {
+      userName: this.$store.getters.getUserData.userName,
       styler: {
         width: '100%',
         margin: '0px',
@@ -58,6 +59,11 @@ export default {
   created () {
     window.addEventListener('resize', this.getHeight)
     this.getHeight()
+  },
+  computed: {
+    user () {
+      return this.$store.getters.getUserData
+    }
   },
   methods: {
     backspace () {
@@ -88,8 +94,6 @@ export default {
         alert('error')
       }
       content = reader.readAsDataURL(localFile, 'UTF-8')
-      var sss = document.getElementById('uploadFile').value
-      console.log(sss)
     }
   }
 }

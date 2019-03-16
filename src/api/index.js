@@ -8,6 +8,14 @@ export function login (query) {
   })
 }
 
+export function getUser (query) {
+  return request({
+    url: '/user/getUser',
+    method: 'post',
+    data: query
+  })
+}
+
 export function register (query) {
   return request({
     url: '/user/register',

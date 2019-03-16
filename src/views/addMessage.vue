@@ -80,18 +80,19 @@ export default {
     userAddMessage () {
       if (this.$refs.new_image.files.length !== 0 || this.messageContent !== null) {
         var messageData = new FormData()
+        var userData = this.$store.getters.getUserData.id
         messageData.append('image', this.$refs.new_image.files[0])
-        // var param = {}
-        // param.image = messageData
-        // param.messageContent = this.messageContent
-        // console.log(messageData)
-        // this.$set(param, 'image', messageData)
-        // this.$set(param, 'messageContent', this.messageContent)
-        addMessage(messageData, this.messageContent).then(response => {
-          console.log('--------------------------')
+        messageData.append('messageContent', this.messageContent)
+        messageData.append('userId', userData)
+        addMessage(messageData).then(response => {
+          var message = response.data.data
+          message.headImg = this.$store.getters.getUserData.headImg
+          message.userName = this.$store.getters.getUserData.userName
+          message.reviewNumber = 0
+          this.$store.commit('addMessageList', message)
         })
       }
-      // this.backspace()
+      this.backspace()
     }
   }
 }

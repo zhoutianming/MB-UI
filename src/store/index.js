@@ -4,7 +4,9 @@ Vue.use(Vuex)
 
 const state = {
   isShow: false,
-  showUserIcon: false
+  showUserIcon: false,
+  userData: {},
+  messageList: []
 }
 
 const getters = {
@@ -13,6 +15,12 @@ const getters = {
   },
   isShowUserIcon (state) {
     return state.showUserIcon
+  },
+  getUserData (state) {
+    return state.userData
+  },
+  getMessageList (state) {
+    return state.messageList
   }
 }
 
@@ -28,6 +36,15 @@ const mutations = {
   },
   hideIcon (state) {
     state.showUserIcon = false
+  },
+  setUserData (state, user) {
+    state.userData = user
+  },
+  setMessageList (state, messageList) {
+    state.messageList = messageList
+  },
+  addMessageList (state, message) {
+    state.messageList.push(message)
   }
 }
 
