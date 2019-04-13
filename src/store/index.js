@@ -6,7 +6,11 @@ const state = {
   isShow: false,
   showUserIcon: false,
   userData: {},
-  messageList: []
+  messageList: [],
+  currentPage: 0,
+  currentUser: {},
+  currentMessage: {},
+  headbgcolor: ''
 }
 
 const getters = {
@@ -21,6 +25,18 @@ const getters = {
   },
   getMessageList (state) {
     return state.messageList
+  },
+  getCurrentMessage (state) {
+    return state.currentMessage
+  },
+  getCurrentUser (state) {
+    return state.currentUser
+  },
+  getCurrent (state) {
+    return state.currentPage
+  },
+  getHeadbgcolor (state) {
+    return state.headbgcolor
   }
 }
 
@@ -36,6 +52,7 @@ const mutations = {
   },
   hideIcon (state) {
     state.showUserIcon = false
+    state.userData = {}
   },
   setUserData (state, user) {
     state.userData = user
@@ -45,6 +62,18 @@ const mutations = {
   },
   addMessageList (state, message) {
     state.messageList.push(message)
+  },
+  setCurrent (state, currentPage) {
+    state.currentPage = currentPage
+  },
+  setCurrentMessage (state, message) {
+    state.currentMessage = message
+  },
+  setCurrentUser (state, user) {
+    state.currentUser = user
+  },
+  setHeadbgcolor (state, color) {
+    state.headbgcolor = color
   }
 }
 

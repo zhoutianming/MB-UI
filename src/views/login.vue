@@ -2,9 +2,9 @@
   <!-- 用户登陆界面 -->
   <div>
     <div v-show="showLogin">
-      <x-header style="background:blue;height:49px">
-        <span>添加</span>
-        <x-icon slot="overwrite-left" type="ios-arrow-back" size="30" style="fill:#fff;position:relative;top:-8px;left:-3px;" @click="backspace"></x-icon>
+      <x-header style="background:#d4d1cf;height:49px">
+        <span style="color:#000000">添加</span>
+        <x-icon slot="overwrite-left" type="ios-arrow-back" size="30" style="fill:#000000;position:relative;top:-8px;left:-3px;" @click="backspace"></x-icon>
       </x-header>
       <!-- <div style="width:100%;position: fixed">
         <i style="width:20px;color:#000000cf;float:left;margin-left:5px" class="fa fa-angle-left fa-2x" @click="backspace"></i>
@@ -17,7 +17,7 @@
       <hr style="margin-top:20px;width:82%">
       <!-- <a style="float:left">忘记密码</a> -->
       <a style="float:none" @click="showLogin = false">没有账号？注册一个</a>
-      <el-button style="position:fixed;left:10%;top:60%;width:80%" type="primary" @click="UserLogin">登录</el-button>
+      <el-button style="margin-top:18px;width:80%" type="primary" @click="userLogin">登录</el-button>
     </div>
       <div v-show="!showLogin">
         <x-header style="background:blue;height:49px">
@@ -60,18 +60,11 @@ export default {
       showLogin: true
     }
   },
-  // mounted () {
-  // /* 页面挂载获取cookie，如果存在username的cookie，则跳转到主页，不需登录 */
-  //   if (getCookie('username')) {
-  //     this.$router.push('/')
-  //     this.$store.dispatch('login')
-  //   }
-  // },
   methods: {
     backspace () {
-      this.$router.push({path: '/'})
+      this.$router.go(-1)
     },
-    UserLogin () {
+    userLogin () {
       if (this.userName === '' || this.password === '') {
         this.$message({
           message: '请输入用户名或密码',
@@ -85,7 +78,7 @@ export default {
         }
         /* 接口请求 */
         login(userVo).then((response) => {
-          /* 接口的传值是(-1,该用户不存在),(-2,密码输入错误),(1,登录成功),(2,管理员登录成功) */
+          /*  接口的传值是(-1,该用户不存在),(-2,密码输入错误),(1,登录成功)  */
           if (response.data.code === -1) {
             this.$message({
               message: '该用户不存在!',
@@ -98,20 +91,6 @@ export default {
               type: 'error',
               center: true
             })
-          } else if (response.data.code === 2) {
-            this.$message({
-              message: '欢迎管理员!',
-              type: 'success',
-              center: true
-            })
-            localStorage.setItem('userName', this.userName)
-            this.$store.commit('setUserData', response.data.data)
-            setTimeout(function () {
-              this.$router.push({path: '/'})
-              this.$store.dispatch('login')
-            }.bind(this), 1000)
-            this.userName = ''
-            this.password = ''
           } else {
             this.$message({
               message: '登录成功!',

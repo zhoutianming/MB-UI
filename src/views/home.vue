@@ -2,43 +2,28 @@
   <div :style="conheight">
     <!-- 导航栏 -->
     <x-header
-    :left-options="{showBack: false}"
-    :right-options="{showMore: false}"
-    @on-click-more="showMenus = true"
-    style="background:#e4e2e4;height:49px;margin-left:-1px;margin-right:-2px;margin-top:-8px;"
-    >
+      :left-options="{showBack: false}"
+      :right-options="{showMore: false}"
+      @on-click-more="showMenus = true"
+      style="background:#d4d1cf;width:100%;height:49px;margin-left:-1px;margin-top:-1px;z-index:2;position:fixed;"
+      >
       <!-- 主页头像内容 -->
       <div slot="left" style="margin-left:-10px;margin-top:-10px">
         <span @click="showSide" v-show="showUserIcon">
           <avatar fullname="userName" :image="user.headImg" :size="40"></avatar>
         </span>
-        <!-- <x-button type="default" text>submit</x-button> -->
         <a style="margin-top:10px;color:green" @click="login" v-show="!showUserIcon">登录</a>
       </div>
       <!-- 搜索框 -->
       <div style="width:100%">
-        <input style="width:83%" type="search" class="header_search" id="searchInput" placeholder="输入关键字搜索">
+        <input style="width:83%" type="search" class="header_search" id="searchInput" placeholder="输入关键字搜索" v-model="searchWord">
         <div style="float:right;margin-top:8px">
-          <x-icon style="color:black;" type="ios-search-strong" @click="reloadDiv" size="30"></x-icon>
+          <x-icon style="color:black;" type="ios-search-strong" @click="search" size="30"></x-icon>
         </div>
-      </div>
-      <!-- 菜单内容 -->
-      <div slot="right" style="">
-        <el-dropdown trigger="click">
-          <span class="el-dropdown-link" style="font-size:1.2em">
-            分类:<i class="el-icon-arrow-down el-icon--right"></i>
-          </span>
-          <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item>全部</el-dropdown-item>
-            <el-dropdown-item>关注</el-dropdown-item>
-            <el-dropdown-item>附近</el-dropdown-item>
-            <el-dropdown-item>高赞</el-dropdown-item>
-          </el-dropdown-menu>
-        </el-dropdown>
       </div>
     </x-header>
     <!-- 添加按钮 -->
-    <div style="position:fixed;left:88%;top:80%;z-index: 10;">
+    <div style="position:fixed;left:86%;top:80%;z-index: 10;">
       <x-icon style="fill:#f17703;" type="ios-plus" @click="addMessage" size="50"></x-icon>
     </div>
     <!-- 侧栏内容 -->
@@ -51,129 +36,188 @@
         <!-- 这里才是侧栏代码部分 -->
         <div class="side-content" v-show="isShowside">
           <div class="head" @click="showUserSelf">
-            <avatar :fullname="user.userName" :image="user.headImg" :size="80"></avatar>
+            <avatar style="margin-top:10px" :fullname="user.userName" :image="user.headImg" :size="100"></avatar>
             <br>
             <span>{{user.userName}}</span>
           </div>
-          <div style="text-align:center">
-            <el-row>
-              <br>
-              <el-button type="text" style="font-size:0.8em;color:#ff0000;width:100%" @click="showCarePerson">关注的人(99)</el-button>
-              <br>
-              <el-button type="text" style="font-size:0.8em;color:#b30606;width:100%">个人收藏(88)</el-button>
-              <br>
-              <el-button type="text" style="font-size:0.8em;color:#800404;width:100%">关注度(100)</el-button>
-              <br>
-              <el-button type="text" style="font-size:0.8em;color:#250101;width:100%">点赞数(99)</el-button>
-            </el-row>
+          <div style="margin-top:-20px;text-align:center">
+            <group>
+              <cell style="background:#d4d1cf;height:20px;color:#000000;" is-link @click.native="showCarePerson">
+                <span slot="title" style="">关注的人({{user.carePersonNum}})</span>
+              </cell>
+              <cell style="background:#d4d1cf;height:20px;color:#000000;" is-link @click.native="toPersonalCollection">
+                <span slot="title" style="">个人收藏({{user.collectionNum}})</span>
+              </cell>
+              <cell style="background:#d4d1cf;height:20px;color:#000000;">
+                <span slot="title" style="color:#000000;">
+                  <span style="vertical-align:middle;">关注度({{user.beCaredNum}})</span>
+                  <badge text="+1"></badge>
+                </span>
+              </cell>
+              <cell style="background:#d4d1cf;height:20px;color:#250101;">
+                <span slot="title" style="color:#000000;">
+                  <span style="vertical-align:middle;">点赞数({{user.praisedNum}})</span>
+                  <badge text="+1"></badge>
+                </span>
+              </cell>
+            </group>
           </div>
-          <div style="margin-top:300%">
-          <el-button type="text" style="float:left" @click="logout">注销</el-button>
-          <el-button type="text" style="float:right" @click="plus.runtime.quit()">退出</el-button>
+          <div style="margin-top:200%">
+            <div @click="logout" style="float:left">
+              <i style="font-size:25px;" class="iconfont icon-icon-test"></i>
+              <el-button type="text">注销</el-button>
+            </div>
+            <div @click="plus.runtime.quit()" style="float:right">
+              <i style="font-size:25px;" class="iconfont icon-tuichu"></i>
+              <el-button type="text">退出</el-button>
+            </div>
           </div>
         </div>
       </transition>
     </div>
+    <br>
     <!-- 留言区 -->
-    <v-touch style="width: 100%;margin:0px;height:92%;" @swipeup="slideNext" @swipedown="slidePre" @swipeleft="reload" @swiperight="reload">
-      <slider ref="slider" :options="option">
-        <slideritem
-          v-for="item in [1,2]"
-          :key="item.index"
-          style="color:black"
+    <v-touch style="width:100%;margin-top:25px;height:92%;" @swipeup="slideNext" @swipedown="slidePre">
+      <Slider
+        ref="slider"
+        style="height:95%;z-index:9"
+        animation="fade"
+        :control-btn="false"
+        :autoplay="false"
+        v-model="sliderIndex"
+      >
+        <SliderItem
+          v-for="(messageArray,index) in messageArrayList"
+          :key="index"
+          style="color:black;"
         >
         <!-- 左右翻页的内容 -->
           <div style="width: 100%;height:100%;margin: 0px;">
             <waterfall
               :line="line"
               :line-gap="line_gap"
-              :watch="messageList"
+              :watch="messageArray"
               ref="waterfall"
               :fixed-height="true"
             >
               <waterfall-slot
-                v-for="(item, index) in messageList"
+                v-for="(item, index) in messageArray"
                 :width="100"
-                :height="item.height"
+                :height="item.imageHeight"
                 :order="index"
                 :key="item.messageId"
                 move-class="itemStyle-move"
-              > sdfgfj=
+              >
                 <!-- 瀑布流形式内容 -->
                 <div class="itemStyle" style="font-size: 0.2em">
                   <!-- 每个小格展示内容 -->
-                  <el-card :body-style="{ padding: '0px' }" shadow="always" style="width:100%;height:auto;background:#ffeb3b;padding:0px">
-                    <div style="width:50%;margin-left:40%;text-align:center" @click="showUserDetail">
+                  <el-card :body-style="{ padding: '0px' }" shadow="always" :style="cardStyle">
+                    <div style="width:50%;margin-left:40%;text-align:center" @click="showUserDetail(item)">
                       <avatar fullname="My Sticker" :image="item.headImg" :size="30"></avatar>
-                      <span style="font-size:2em;">{{item.userName}}</span>
+                      <span style="font-size:13px;">{{item.userName}}</span>
                     </div>
-                    <div ref="cards" style="width:100%;" @click="showMessageDetail">
-                      <span style="width:100%;float:left;overflow:hidden;text-overflow: ellipsis;white-space: normal;text-align:left">
+                    <div style="width:100%;" @click="showMessageDetail(item)">
+                      <span id="messageText" style="font-size:15px;">
                         {{item.messageContent}}
                       </span>
-                      <img :src="item.messageImg" style="width:100%;display: block;">
+                      <div>
+                        <img :src="item.messageImg" style="width:100%;height:auto;display: block;">
+                      </div>
                     </div>
                     <br>
-                    <div style="text-align:center;margin-bottom:10px">
-                      <span style="float:left;font-size:0.2em;color: #999;">{{item.time}}</span>
-                      <span style="float:right;font-size:0.2em">浏览{{item.pageViews}}次</span>
+                    <div style="text-align:center;margin-bottom:10px;color:#000">
+                      <span style="float:left;font-size:10px;color:#000;">{{item.time}}</span>
+                      <span style="float:right;font-size:10px">点击浏览{{item.pageViews}}次</span>
                       <br><br>
-                      <i style="font-size:20px" class="iconfont icon-dianzan" @click="item.praisePoint++"></i>
-                      <span style="font-size:0.5em">{{item.praisePoint}}</span>
-                      <i style="font-size:20px;margin-left:5px" class="iconfont icon-shoucang1" @click="item.collectionNumber++"></i>
-                      <span style="font-size:0.5em">{{item.collectionNumber}}</span>
-                      <i style="font-size:20px;margin-left:5px" class="iconfont icon-tubiaozhizuomobanyihuifu-" @click="showMarkerLists"></i>
-                      <span style="font-size:0.5em">{{item.reviewNumber}}</span>
+                      <i style="font-size:15px;margin-left:5px" class="iconfont icon-dianzan" @click="addPraisePoint(item)"></i>
+                      <span style="font-size:13px">{{item.praisePoint}}</span>
+                      <i style="font-size:15px;margin-left:5px" class="iconfont icon-shoucang1" @click="addCollectionNum(item)"></i>
+                      <span style="font-size:13px">{{item.collectionNumber}}</span>
+                      <i style="font-size:15px;margin-left:5px" class="iconfont icon-tubiaozhizuomobanyihuifu-" @click="showMessageDetail(item)"></i>
+                      <span style="font-size:13px">{{item.reviewNumber}}</span>
                     </div>
                   </el-card>
                 </div>
               </waterfall-slot>
             </waterfall>
           </div>
-        </slideritem>
-      </slider>
+        </SliderItem>
+      </Slider>
     </v-touch>
+    <!-- 底部菜单栏 -->
+    <div style="margin-top:-32px;">
+      <tab style="z-index:5"
+        :line-width=5
+        active-color='#f17703'>
+        <tab-item
+          class="vux-center"
+          :selected="item === '精选'"
+          v-for="(item, index) in ['精选', '情感', '搞笑', '段子', '求助', '问答']"
+          :key="index"
+          @on-item-click="selectMenu(item)">
+          {{item}}
+        </tab-item>
+      </tab>
+    </div>
   </div>
 </template>
 
 <script>
-import {XHeader, XButton} from 'vux'
-import {getAllMessage, getUser} from '@/api'
+import {Cell, Group, XHeader, XButton, Badge, Tab, TabItem} from 'vux'
+import {getTabAllMessage, getAllMessage, getUser, addPraise, addView, addCollection, search} from '@/api'
+import {split} from '@/util/splitArray'
 
 export default {
   components: {
+    Cell,
+    Group,
     XHeader,
-    XButton
+    XButton,
+    Badge,
+    Tab,
+    TabItem
   },
   name: 'home',
   data () {
     return {
-      goodNumber: 100,
-      currentDate: '2019-11-12',
+      sliderIndex: Number,
       line: 'v',
       line_gap: 100,
       conheight: {
-        height: ''
+        height: '',
+        background: '#c8e4da'
       },
       option: {
-        effect: 'fade',
-        currentPage: 0,
+        effect: 'nest',
+        currentPage: 1,
         direction: 'horizontal',
         pagination: true,
         thresholdDistance: 50,
         thresholdTime: 300,
-        speed: 300,
         loop: true
       },
-      messageArrayList: []
+      messageArrayList: [],
+      messageTabs: '',
+      searchWord: '',
+      cardStyle: {
+        width: '100%',
+        height: 'auto',
+        background: '#8bceb6',
+        padding: '0px'
+      }
     }
   },
   created () {
-    this.getData()
+    this.getDatas()
     window.addEventListener('resize', this.getHeight)
     this.getHeight()
     window.addEventListener('resize', this.getWidth)
     this.getWidth()
+    this.sliderIndex = this.$store.getters.getCurrent
+    this.$store.dispatch('hideSideBar')
+  },
+  destroyed () {
+    this.$store.commit('setCurrent', this.sliderIndex)
   },
   computed: {
     isShowside () {
@@ -194,25 +238,39 @@ export default {
     if (localStorage.hasOwnProperty('userName')) {
       this.$router.push({path: '/'})
       this.$store.dispatch('login')
-      var userName = localStorage.getItem('userName')
-      getUser(userName).then((response) => {
+      var user = {}
+      user.userName = localStorage.getItem('userName')
+      getUser(user).then((response) => {
         this.$store.commit('setUserData', response.data.data)
-        console.log(response.data.data)
       })
     }
-    //  else {
-    //   this.$router.push({path: '/login'})
-    // }
-    this.reloadDiv()
   },
   methods: {
-    getData () {
+    getDatas () {
       getAllMessage().then((response) => {
         var messageList = response.data.data
         for (var i in messageList) {
-          this.$set(messageList[i], 'height', 300)
+          messageList[i].imageHeight = messageList[i].imageHeight * 0.55 + 175
+          messageList[i].isPraise = false
+          messageList[i].isCollection = false
         }
         this.$store.commit('setMessageList', messageList)
+        this.messageArrayList = split(messageList, 4)
+      })
+    },
+    getData (datas) {
+      var messageVO = {}
+      this.messageArrayList = []
+      messageVO.messageTabs = datas
+      getTabAllMessage(messageVO).then((response) => {
+        var messageList = response.data.data
+        for (var i in messageList) {
+          messageList[i].imageHeight = messageList[i].imageHeight * 0.55 + 135
+          messageList[i].isPraise = false
+          messageList[i].isCollection = false
+        }
+        this.$store.commit('setMessageList', messageList)
+        this.messageArrayList = split(messageList, 4)
       })
     },
     login () {
@@ -221,45 +279,95 @@ export default {
     addMessage () {
       this.$router.push({path: '/add'})
     },
-    showUserDetail () {
-      this.$router.push({path: '/userDetail'})
+    showUserDetail (item) {
+      if (item.userId === this.$store.getters.getUserData.id) {
+        this.showUserSelf()
+      } else {
+        var user = {}
+        user.userId = item.userId
+        user.userName = item.userName
+        user.headImg = item.headImg
+        this.$store.commit('setCurrentUser', user)
+        this.$router.push({path: '/userDetail'})
+      }
     },
     showUserSelf () {
       this.$router.push({path: '/userSelf'})
     },
-    showMessageDetail () {
-      this.$router.push({path: '/messageDetail'})
+    toPersonalCollection () {
+      this.$router.push({path: '/personalCollection'})
     },
-    showMarkerLists () {
+    showMessageDetail (item) {
+      item.pageViews++
+      var messageVO = {}
+      messageVO.messageId = item.messageId
+      addView(messageVO)
+      this.$store.commit('setCurrentMessage', item)
       this.$router.push({path: '/messageDetail'})
     },
     showCarePerson () {
       this.$router.push({path: '/care'})
     },
-    addOne (param) {
-      param++
+    addPraisePoint (item) {
+      if (item.isPraise) {
+        this.dianzanSytle.color = 'red'
+      }
+      item.isPraise = !item.isPraise
+      item.praisePoint++
+      var messageVO = {}
+      messageVO.messageId = item.messageId
+      addPraise(messageVO)
+    },
+    addCollectionNum (item) {
+      if (localStorage.hasOwnProperty('userName')) {
+        var messageVO = {}
+        messageVO.userId = this.$store.getters.getUserData.id
+        messageVO.messageId = item.messageId
+        addCollection(messageVO).then((response) => {
+          if (response.data.code === 1) {
+            item.collectionNumber++
+            this.$message({
+              message: '收藏成功!',
+              type: 'success',
+              center: true
+            })
+          } else if (response.data.code === -1) {
+            this.$message({
+              message: '您已收藏留言!',
+              type: 'error',
+              center: true
+            })
+          } else {
+            this.$message({
+              message: '收藏失败!',
+              type: 'error',
+              center: true
+            })
+          }
+        })
+      } else {
+        this.$message({
+          message: '请先登录!',
+          type: 'success',
+          center: true
+        })
+        this.$router.push({path: '/login'})
+      }
     },
     getHeight () {
-      this.conheight.height = window.innerHeight + 'px'
+      this.conheight.height = window.innerHeight - 8 + 'px'
     },
     getWidth () {
       this.line_gap = window.innerWidth / 2 - 2
     },
     slideNext () {
-      this.$refs.slider.$emit('slideNext')
-      this.reload()
+      this.$refs.slider.next()
     },
     slidePre () {
-      this.$refs.slider.$emit('slidePre')
-      this.reload()
+      this.$refs.slider.prev()
     },
     showSide () {
       this.$store.dispatch('showSideBar')
-    },
-    reload () {
-      this.messageList.sort(function () {
-        return Math.random() - 0.5
-      })
     },
     hideSide () {
       this.$store.dispatch('hideSideBar')
@@ -270,16 +378,38 @@ export default {
       /* 删除cookie */
       localStorage.clear()
     },
-    reloadDiv () {
-      setTimeout(() => {
-        var divHeight = this.$refs.cards
-        var messageList = this.$store.getters.getMessageList
+    toManagePage () {
+      this.$router.replace({path: '/admin'})
+    },
+    selectMenu (item) {
+      if (item === '精选') {
+        this.getDatas()
+      } else {
+        this.getData(item)
+      }
+    },
+    search () {
+      var messageVO = {}
+      this.messageArrayList = []
+      messageVO.messageContent = this.searchWord
+      search(messageVO).then((response) => {
+        var messageList = response.data.data
         for (var i in messageList) {
-          var innerDivHeight = divHeight[i].offsetHeight
-          var cardDiv = innerDivHeight + 110
-          messageList[i].height = cardDiv
+          messageList[i].imageHeight = messageList[i].imageHeight * 0.55 + 135
+          messageList[i].isPraise = false
+          messageList[i].isCollection = false
         }
-      }, 2000)
+        this.$store.commit('setMessageList', messageList)
+        this.messageArrayList = split(messageList, 4)
+      })
+    },
+    getRandomColor () {
+      var rand = Math.floor(Math.random() * 0xFFFFFF).toString(16)
+      if (rand.length === 6) {
+        return rand
+      } else {
+        return this.getRandomColor()
+      }
     }
   }
 }
@@ -329,9 +459,9 @@ export default {
 .side-content {
   z-index: 11;
   position: fixed;
-  width: 120px;
+  width: 180px;
   height: 100%;
-  background: #ade4c3;
+  background: #d4d1cf;
   top: 0;
   left: 0;
   bottom: 0;
@@ -361,12 +491,19 @@ export default {
 }
 .head {
   display: block;
-  width: 118px;
-  height: 118px;
-  background: #ffffff;
+  width: 180px;
+  height: 180px;
+  background: #b5bbae;
   background-size: cover;
-  border: 1px solid #fff;
   overflow: hidden;
+}
+.vux-header-title-area{
+    margin: 0px;
+    height: 40px;
+    width: 70%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 body {
   margin: 5px;
@@ -374,10 +511,10 @@ body {
 }
 .itemStyle {
   position: absolute;
-  top: 2px;
-  left: 4px;
-  right: 4px;
-  bottom: 2px;
+  top: 6px;
+  left: 6px;
+  right: 6px;
+  bottom: 0px;
   font-size: 1.5em;
   color: rgb(0,158,107);
 }
@@ -405,5 +542,14 @@ body {
   float:left;
   font-size: 0.2em;
   color: #999;
+}
+#messageText {
+  float:left;
+  text-align:left;
+  width:100%;
+  height:24px;
+  overflow:hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

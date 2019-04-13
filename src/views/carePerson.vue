@@ -1,25 +1,32 @@
 <template>
-  <div :style="conheight">
-    <x-header style="width:100%;background:blue;height:49px;margin-left:-1px;margin-top:-1px;">
+  <div>
+    <x-header style="z-index:2;position:fixed;width:100%;background:#d4d1cf;height:49px;margin-left:-1px;margin-top:-2px;">
       <!-- 搜索框 -->
-      <div style="width:100%">
-        <input style="width:83%" type="search" class="header_search" id="searchInput" placeholder="搜索关注的人">
-        <div style="float:right;margin-top:8px">
-          <x-icon style="color:black;" type="ios-search-strong" @click="search" size="30"></x-icon>
-        </div>
-      </div>
-      <x-icon slot="overwrite-left" type="ios-arrow-back" size="30" style="fill:#fff;position:relative;top:-8px;left:-3px;" @click="backspace"></x-icon>
+      <span style="color:#000000">关注的人</span>
+      <x-icon slot="overwrite-left" type="ios-arrow-back" size="30" style="fill:#000000;position:relative;top:-8px;left:-3px;" @click="backspace"></x-icon>
     </x-header>
-    <!-- 用户区 -->
-    <div style="text-align:center" @click="showUserDetail">
-      <avatar style="" fullname="My Sticker" image="https://raw.githubusercontent.com/ssouron/vue-avatar-component/master/img/example3.jpg" :size="60"></avatar>
-      <div style="margin-top:-2px">小明</div>
+    <br>
+    <div style="margin-top:35px">
+      <div v-for="(item, index) in careUserList" :key="index" style="border-radius:10px;width:100%;height:80px;background:#d4d1cf;text-align:center;margin-top:10px">
+        <div @click="showUserDetail(item)">
+          <avatar style="margin-top:4px;margin-left:6px;float:left" :fullname="item.userName" :image="item.headImg" :size="72"></avatar>
+          <div style="float:left;text-align:left;margin-top:28px;margin-left:6px;">
+            <div style="font-size:1em">{{item.userName}}</div>
+            <div style="text-align:center;margin-bottom:10px">
+              <span style="font-size:0.5em">点赞数:{{item.praisedNum}}</span>
+              <span style="font-size:0.5em">关注度:{{item.beCaredNum}}</span>
+            </div>
+          </div>
+        </div>
+        <el-button circle size="normal" type="primary" style="z-index:2;float:right;width:80px;margin-top:20px;margin-right:24px" @click="unfollow(item)">取消关注</el-button>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import {XHeader, XButton} from 'vux'
+import {getCare, unfollow} from '@/api'
 
 export default {
   components: {
@@ -29,9 +36,11 @@ export default {
   name: 'care',
   data () {
     return {
+      careUserList: []
     }
   },
   created () {
+    this.getCarePerson()
   },
   computed: {
     isShowside () {
@@ -44,11 +53,42 @@ export default {
   mounted () {
   },
   methods: {
+    getCarePerson () {
+      var userData = {}
+      userData.id = this.$store.getters.getUserData.id
+      getCare(userData).then((response) => {
+        this.careUserList = response.data.data
+      })
+    },
     backspace () {
       this.$router.push({path: '/'})
     },
-    showUserDetail () {
-      this.$router.replace({path: '/userDetail'})
+    showUserDetail (users) {
+      var user = {}
+      user.userId = users.id
+      user.userName = users.userName
+      user.headImg = users.headImg
+      this.$store.commit('setCurrentUser', user)
+      this.$router.push({path: '/userDetail'})
+    },
+    unfollow (item) {
+      var carePersonDO = {}
+      carePersonDO.userId = this.$store.getters.getUserData.id
+      carePersonDO.carePersonId = item.id
+      unfollow(carePersonDO).then((response) => {
+        if (response.data.code === 1) {
+          this.$message({
+            message: '取消关注成功!',
+            type: 'success',
+            center: true
+          })
+          for (var i in this.careUserList) {
+            if (this.careUserList[i].id === item.id) {
+              this.careUserList.splice(i, 1)
+            }
+          }
+        }
+      })
     }
   }
 }
