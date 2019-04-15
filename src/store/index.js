@@ -10,7 +10,8 @@ const state = {
   currentPage: 0,
   currentUser: {},
   currentMessage: {},
-  headbgcolor: ''
+  headbgcolor: '',
+  tab: '精选'
 }
 
 const getters = {
@@ -34,6 +35,9 @@ const getters = {
   },
   getCurrent (state) {
     return state.currentPage
+  },
+  getTab (state) {
+    return state.tab
   },
   getHeadbgcolor (state) {
     return state.headbgcolor
@@ -66,6 +70,9 @@ const mutations = {
   setCurrent (state, currentPage) {
     state.currentPage = currentPage
   },
+  setTab (state, tab) {
+    state.tab = tab
+  },
   setCurrentMessage (state, message) {
     state.currentMessage = message
   },
@@ -74,6 +81,9 @@ const mutations = {
   },
   setHeadbgcolor (state, color) {
     state.headbgcolor = color
+  },
+  addPraiseMessage (state, praiseList) {
+    state.userData.praiseList = praiseList
   }
 }
 

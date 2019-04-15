@@ -1,23 +1,23 @@
 <template>
   <!-- 每个留言的详情页 -->
   <div style="">
-    <x-header style="width:100%;background:#d4d1cf;height:49px;position:fixed;margin-top:-1px">
+    <x-header style="width:100%;background:#8bceb6;height:49px;position:fixed;margin-top:-1px">
       <x-icon slot="overwrite-left" type="ios-arrow-back" size="30" style="fill:#000000;position:relative;top:-8px;left:-3px;" @click="backspace"></x-icon>
       <div style="text-align:center" @click="showUserDetail(message)">
         <avatar style="" :fullname="message.userName" :image="message.headImg" :size="35"></avatar>
         <span style="margin-top:-2px;color:#000000">{{message.userName}}</span>
       </div>
     </x-header>
-    <x-header style="width:100%;background:#d4d1cf;height:49px;position:fixed;left:0px;top:93%;;margin-left:-1px;margin-top:-1px;" @touchmove.prevent>
+    <x-header style="width:100%;background:#8bceb6;height:49px;position:fixed;left:0px;top:93%;;margin-left:-1px;margin-top:-1px;" @touchmove.prevent>
       <div slot="overwrite-left">
-        <i style="font-size:30px;color:#ff0000" class="iconfont icon-dianzan" @click="addPraisePoint(message)"></i>
-        <i style="margin-left:5px;font-size:30px;color:#000000" class="iconfont icon-shoucang1"  @click="addCollectionNum(message)"></i>
+        <i :style="{font_size:'30px', color:message.isPraise}" class="iconfont icon-dianzan1" @click="addPraisePoint(message)"></i>
+        <i :style="{font_size:'30px', margin_left:'5px', color: message.isCollection}" class="iconfont icon-shoucang"  @click="addCollectionNum(message)"></i>
       </div>
       <div slot="right">
         <i style="font-size:35px;color:#000000" class="iconfont icon-tubiaozhizuomobanyihuifu-" @click="showMarkPage"></i>
       </div>
     </x-header>
-    <div style="overflow:scroll;height:90%;margin-bottom:70px">
+    <div style="overflow:scroll;height:90%;padding-bottom:70px;background:#d4d1cf;">
       <div style="border-radius:10px;background:#d4d1cf;width:100%;text-align:center;margin-top:52px;">
         <div style="width:90%;margin-left:5%;float:left;text-overflow:ellipsis;white-space:normal;text-align:left;font-size:20px">
           {{message.messageContent}}
@@ -29,9 +29,9 @@
       <time class="time" style="float:left;margin-left:10px">{{message.time}}</time><br>
       <div style="text-align:center;">
           <span style="font-size:12px">浏览{{message.pageViews}}次</span>
-          <i style="font-size:20px;margin-left:15px" class="iconfont icon-dianzan"></i>
+          <i :style="{font_size: '23px',margin_left: '15px', color:message.isPraise}" class="iconfont icon-dianzan1"></i>
           <span style="font-size:0.5em">{{message.praisePoint}}</span>
-          <i style="font-size:20px;margin-left:15px" class="iconfont icon-shoucang1"></i>
+          <i :style="{font_size:'23px',margin_left:'15px', color: message.isCollection}" class="iconfont icon-shoucang"></i>
           <span style="font-size:0.5em">{{message.collectionNumber}}</span>
           <i style="font-size:23px;margin-left:15px" class="iconfont icon-006pinglunhuifu" @click="showMarkerList"></i>
           <span style="font-size:0.5em">{{message.reviewNumber}}</span>
@@ -190,14 +190,48 @@ export default {
         this.$router.push({path: '/login'})
       }
     },
-    addCollectionNum (item) {
+    addPraisePoint (message) {
+      if (localStorage.hasOwnProperty('userName')) {
+        var userData = {}
+        var user = this.$store.getters.getUserData
+        userData.id = user.id
+        userData.praiseList = user.praiseList + ',' + message.messageId
+        addPraise(userData).then((response) => {
+          if (response.data.code === 1) {
+            message.praisePoint++
+            message.isPraise = '#ff0000'
+            this.$store.commit('addPraiseMessage', userData.praiseList)
+            this.$message({
+              message: '点赞!',
+              type: 'success',
+              center: true
+            })
+          } else {
+            this.$message({
+              message: '您已点赞过~',
+              type: 'error',
+              center: true
+            })
+          }
+        })
+      } else {
+        this.$message({
+          message: '请先登录!',
+          type: 'success',
+          center: true
+        })
+        this.$router.push({path: '/login'})
+      }
+    },
+    addCollectionNum (message) {
       if (localStorage.hasOwnProperty('userName')) {
         var messageVO = {}
         messageVO.userId = this.$store.getters.getUserData.id
-        messageVO.messageId = item.messageId
+        messageVO.messageId = message.messageId
         addCollection(messageVO).then((response) => {
           if (response.data.code === 1) {
-            item.collectionNumber++
+            message.collectionNumber++
+            message.isCollection = '#f17703'
             this.$message({
               message: '收藏成功!',
               type: 'success',
@@ -225,12 +259,6 @@ export default {
         })
         this.$router.push({path: '/login'})
       }
-    },
-    addPraisePoint (message) {
-      message.praisePoint++
-      var messageVO = {}
-      messageVO.messageId = message.messageId
-      addPraise(messageVO)
     },
     userReview () {
       if (this.reviews) {

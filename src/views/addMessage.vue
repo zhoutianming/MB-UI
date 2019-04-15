@@ -6,7 +6,16 @@
       <x-icon slot="overwrite-left" type="ios-arrow-back" size="30" style="fill:#000000;position:relative;top:-8px;left:-3px;" @click="backspace"></x-icon>
     </x-header>
     <div style="margin-top:10px;height:auto">
-      <div style="background:#b1e8bb;border-radius:20px;width:90%;height:auto;margin:0 auto;text-align:center;">
+      <div style="margin-top:6px;margin-bottom:20px">
+        <checker
+          v-model="messageTabs"
+          type="checkbox"
+          default-item-class="item"
+          selected-item-class="item-selected">
+          <checker-item v-for="(item, index) in ['情感', '搞笑', '美食', '段子', '求助']" :key="index" :value="item">{{item}}</checker-item>
+        </checker>
+      </div>
+      <div style="background:#8bceb6;border-radius:20px;width:90%;height:auto;margin:0 auto;text-align:center;">
         <span>添加文字：</span><br>
         <el-input
           type="textarea"
@@ -28,17 +37,7 @@
         </div>
         <i v-show="!show" style="font-size:50px" class="iconfont icon-tupian" @click="imgClick"></i>
         <input style="float: left;display: none;" type="file" id='uploadFile'  enctype="multipart/form-data" accept="image/*" ref="new_image" @change="readLocalFile">
-        <br><br>
-        <div style="margin-top:6px;margin-bottom:20px">
-          <checker
-            v-model="messageTabs"
-            type="checkbox"
-            default-item-class="item"
-            selected-item-class="item-selected">
-            <checker-item v-for="(item, index) in ['情感', '搞笑', '段子', '求助', '问答']" :key="index" :value="item">{{item}}</checker-item>
-          </checker>
-        </div>
-        <br><br>
+        <br><br><br>
       </div>
       <span slot="footer" style="width:100%;position: fixed;left:0;top:92%" class="dialog-footer">
         <el-button style="float:left;width:38%;background:#d4d1cf" @click="backspace">取 消</el-button>
@@ -114,8 +113,8 @@ export default {
         var messageData = new FormData()
         var userData = this.$store.getters.getUserData.id
         var imageHeight = this.$refs.image.offsetHeight
-        if (imageHeight >= 250) {
-          imageHeight = 250
+        if (imageHeight >= 280) {
+          imageHeight = 280
         }
         var imageWidth = this.$refs.image.offsetWidth
         messageData.append('image', this.$refs.new_image.files[0])

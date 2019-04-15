@@ -7,23 +7,26 @@
     </x-header>
     <br>
     <div style="margin-top:28px">
-      <div v-for="(item, index) in userCollectionMessage" :key="index" style="width:100%;height:80px;background:#8080ab;text-align:center;margin-top:3px" @click="showMessageDetail(item)">
-        <img :src="item.messageImg" style="float:left;width:66px;height:66px;margin-left:8px;margin-top:8px;display: block;">
-        <span style="float:right;text-align:left;width:80%;overflow:hidden;text-overflow:ellipsis;white-space: nowrap;">
-          {{item.messageContent}}
-        </span>
-        <div style="float:right;text-align:left;margin-top:20px;margin-right:11px">
-          <avatar style="float:left" :fullname="item.userName" :image="item.headImg" :size="30"></avatar>
-          <div style="float:right;font-size:1em">{{item.userName}}</div>
+      <div v-for="(item, index) in userCollectionMessage" :key="index" style="width:100%;height:80px;background:#8bceb6;text-align:center;margin-top:3px">
+        <img :src="item.messageImg" style="float:left;width:10%;height:66px;margin-left:1%;margin-top:8px;display: block;" @click="showMessageDetail(item)">
+        <el-button size="small" type="text" style="color:#af1f1f;border-radius:10px;z-index:2;float:right;width:23%;margin-top:20px;margin-right:5px" @click="unCollection(index)">取消收藏</el-button>
+        <div style="float:right;width:60%" @click="showMessageDetail(item)">
+          <span style="float:right;text-align:left;width:98%;overflow:hidden;text-overflow:ellipsis;white-space: nowrap;">
+            {{item.messageContent}}
+          </span>
+          <div style="float:right;text-align:left;margin-top:20px;margin-right:11px">
+            <avatar style="float:left" :fullname="item.userName" :image="item.headImg" :size="30"></avatar>
+            <div style="float:right;font-size:1em">{{item.userName}}</div>
+          </div>
+          <span style="float:left;font-size:0.6em;margin-left:10px;margin-top:33px">{{item.time}}</span>
         </div>
-        <span style="float:left;font-size:0.2em;margin-left:10px;margin-top:33px">{{item.time}}</span>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import {getUserCollection, deleteMessage, addView} from '@/api'
+import {getUserCollection, deleteMessage, addView, unCollection} from '@/api'
 import {XHeader, Cell, Group} from 'vux'
 
 export default {
@@ -97,6 +100,22 @@ export default {
       addView(messageVO)
       this.$store.commit('setCurrentMessage', item)
       this.$router.push({path: '/messageDetail'})
+    },
+    unCollection (index) {
+      var messageVO = {}
+      messageVO.userId = this.$store.getters.getUserData.id
+      messageVO.messageId = this.userCollectionMessage[index].messageId
+      unCollection(messageVO).then((response) => {
+        if (response.data.code === 1) {
+          this.userCollectionMessage.splice(index, 1)
+          localStorage.setItem('celloctionColor', '#ffffff')
+          this.$message({
+            message: '取消收藏成功!',
+            type: 'success',
+            center: true
+          })
+        }
+      })
     }
   }
 }

@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import {editUser} from '@/api'
+import {editUser, getUser} from '@/api'
 
 export default {
   components: {
@@ -100,16 +100,33 @@ export default {
     },
     editUsers () {
       this.$store.commit('setHeadbgcolor', this.styler.background)
-      if (this.$refs.head_image.files.length !== 0 || this.userName !== null) {
+      if (this.$refs.head_image.files.length === 0) {
+        var userHead1 = new FormData()
+        var user1 = this.$store.getters.getUserData
+        userHead1.append('userName', this.userName)
+        userHead1.append('id', user1.id)
+        editUser(userHead1).then(response => {
+          localStorage.setItem('userName', this.userName)
+          this.$store.commit('setUserData', response.data.data)
+          user1 = response.data.data
+          getUser(user1).then((response) => {
+            this.$store.commit('setUserData', response.data.data)
+          })
+        })
+      } else {
         var userHead = new FormData()
         var user = this.$store.getters.getUserData
+        userHead.append('oldHeadImg', this.$store.getters.getUserData.headImg)
         userHead.append('headImg', this.$refs.head_image.files[0])
         userHead.append('userName', this.userName)
         userHead.append('id', user.id)
         editUser(userHead).then(response => {
-          user.userName = response.data.data.userName
-          user.headImg = response.data.data.headImg
-          this.$store.commit('setUserData', user)
+          localStorage.setItem('userName', this.userName)
+          this.$store.commit('setUserData', response.data.data)
+          user = response.data.data
+          getUser(user).then((response) => {
+            this.$store.commit('setUserData', response.data.data)
+          })
         })
       }
       this.backspace()

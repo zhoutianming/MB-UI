@@ -1,7 +1,7 @@
 <template>
   <!-- user详情页 -->
   <div style="width:100%;height:100%;">
-    <x-header style="z-index:2;background:blue;height:49px;width:100%;position: fixed;margin-left:-1px;margin-top:-1px;">
+    <x-header style="z-index:2;background:#8bceb6;height:49px;width:100%;position: fixed;margin-left:-1px;margin-top:-1px;">
       <span style="color:#000000">用户</span>
       <x-icon slot="overwrite-left" type="ios-arrow-back" size="30" style="fill:#000000;position:relative;top:-8px;left:-3px;" @click="backspace"></x-icon>
     </x-header>

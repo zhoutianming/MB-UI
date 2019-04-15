@@ -62,7 +62,7 @@
               </cell>
             </group>
           </div>
-          <div style="margin-top:200%">
+          <div style="margin-top:185%">
             <div @click="logout" style="float:left">
               <i style="font-size:25px;" class="iconfont icon-icon-test"></i>
               <el-button type="text">注销</el-button>
@@ -87,8 +87,8 @@
         v-model="sliderIndex"
       >
         <SliderItem
-          v-for="(messageArray,index) in messageArrayList"
-          :key="index"
+          v-for="(messageArray,index1) in messageArrayList"
+          :key="index1"
           style="color:black;"
         >
         <!-- 左右翻页的内容 -->
@@ -101,23 +101,25 @@
               :fixed-height="true"
             >
               <waterfall-slot
-                v-for="(item, index) in messageArray"
+                v-for="(item, index2) in messageArray"
                 :width="100"
                 :height="item.imageHeight"
-                :order="index"
+                :order="index2"
                 :key="item.messageId"
                 move-class="itemStyle-move"
               >
                 <!-- 瀑布流形式内容 -->
                 <div class="itemStyle" style="font-size: 0.2em">
-                  <!-- 每个小格展示内容 -->
                   <el-card :body-style="{ padding: '0px' }" shadow="always" :style="cardStyle">
-                    <div style="width:50%;margin-left:40%;text-align:center" @click="showUserDetail(item)">
+                    <div style="width:90%;margin-left:5%;text-align:center" @click="showUserDetail(item)">
                       <avatar fullname="My Sticker" :image="item.headImg" :size="30"></avatar>
                       <span style="font-size:13px;">{{item.userName}}</span>
                     </div>
                     <div style="width:100%;" @click="showMessageDetail(item)">
-                      <span id="messageText" style="font-size:15px;">
+                      <span v-show="isDuanzi" style="float:left;text-align:left;width:100%;height:140px;overflow:hidden;text-overflow: ellipsis;white-space: normal;font-size:13px;">
+                        {{item.messageContent}}
+                      </span>
+                      <span v-show="!isDuanzi" style="float:left;text-align:left;width:100%;height:24px;overflow:hidden;text-overflow: ellipsis;white-space: nowrap;font-size:13px;">
                         {{item.messageContent}}
                       </span>
                       <div>
@@ -126,15 +128,19 @@
                     </div>
                     <br>
                     <div style="text-align:center;margin-bottom:10px;color:#000">
-                      <span style="float:left;font-size:10px;color:#000;">{{item.time}}</span>
-                      <span style="float:right;font-size:10px">点击浏览{{item.pageViews}}次</span>
-                      <br><br>
-                      <i style="font-size:15px;margin-left:5px" class="iconfont icon-dianzan" @click="addPraisePoint(item)"></i>
-                      <span style="font-size:13px">{{item.praisePoint}}</span>
-                      <i style="font-size:15px;margin-left:5px" class="iconfont icon-shoucang1" @click="addCollectionNum(item)"></i>
-                      <span style="font-size:13px">{{item.collectionNumber}}</span>
-                      <i style="font-size:15px;margin-left:5px" class="iconfont icon-tubiaozhizuomobanyihuifu-" @click="showMessageDetail(item)"></i>
-                      <span style="font-size:13px">{{item.reviewNumber}}</span>
+                      <div>
+                        <span style="float:left;font-size:10px;color:#000;">{{item.time}}</span>
+                        <span style="float:right;font-size:10px">点击浏览{{item.pageViews}}次</span>
+                      </div>
+                      <br>
+                      <div style="width:100%;margin-top:10px;">
+                        <i :style="{font_size: '13px',margin_left: '0px',color:item.isPraise}" class="iconfont icon-dianzan1" @click="addPraisePoint(index1, index2)"></i>
+                        <span style="font-size:10px">{{item.praisePoint}}</span>
+                        <i :style="{font_size:'13px',margin_left:'5px',color: item.isCollection}" class="iconfont icon-shoucang" @click="addCollectionNum(index1,index2)"></i>
+                        <span style="font-size:10px">{{item.collectionNumber}}</span>
+                        <i style="font-size:13px;margin-left:5px" class="iconfont icon-tubiaozhizuomobanyihuifu-" @click="showMessageDetail(item)"></i>
+                        <span style="font-size:10px">{{item.reviewNumber}}</span>
+                      </div>
                     </div>
                   </el-card>
                 </div>
@@ -151,8 +157,8 @@
         active-color='#f17703'>
         <tab-item
           class="vux-center"
-          :selected="item === '精选'"
-          v-for="(item, index) in ['精选', '情感', '搞笑', '段子', '求助', '问答']"
+          :selected="item === tab"
+          v-for="(item, index) in ['精选', '情感', '搞笑', '美食', '段子', '求助', '其他']"
           :key="index"
           @on-item-click="selectMenu(item)">
           {{item}}
@@ -204,11 +210,41 @@ export default {
         height: 'auto',
         background: '#8bceb6',
         padding: '0px'
+      },
+      isDuanzi: false,
+      praiseStyle: {
+        font_size: '13px',
+        margin_left: '0px',
+        color: '#ffffff'
+      },
+      collectionStyle: {
+        font_size: '13px',
+        margin_left: '5px',
+        color: '#ffffff'
       }
     }
   },
   created () {
-    this.getDatas()
+    var user = {}
+    user.userName = localStorage.getItem('userName')
+    getUser(user).then((response) => {
+      this.$store.commit('setUserData', response.data.data)
+    })
+    var item = this.$store.getters.getTab
+    if (item !== null) {
+      this.messageArrayList = []
+      if (item === '精选') {
+        this.getDatas()
+      } else {
+        if (item === '段子') {
+          this.isDuanzi = true
+          this.getDuanziData(item)
+        } else {
+          this.isDuanzi = false
+          this.getData(item)
+        }
+      }
+    }
     window.addEventListener('resize', this.getHeight)
     this.getHeight()
     window.addEventListener('resize', this.getWidth)
@@ -231,6 +267,9 @@ export default {
     },
     user () {
       return this.$store.getters.getUserData
+    },
+    tab () {
+      return this.$store.getters.getTab
     }
   },
   mounted () {
@@ -238,36 +277,43 @@ export default {
     if (localStorage.hasOwnProperty('userName')) {
       this.$router.push({path: '/'})
       this.$store.dispatch('login')
-      var user = {}
-      user.userName = localStorage.getItem('userName')
-      getUser(user).then((response) => {
-        this.$store.commit('setUserData', response.data.data)
-      })
     }
   },
   methods: {
     getDatas () {
-      getAllMessage().then((response) => {
+      var messageVO = {}
+      messageVO.userId = this.$store.getters.getUserData.id
+      getAllMessage(messageVO).then((response) => {
         var messageList = response.data.data
         for (var i in messageList) {
-          messageList[i].imageHeight = messageList[i].imageHeight * 0.55 + 175
-          messageList[i].isPraise = false
-          messageList[i].isCollection = false
+          messageList[i].imageHeight = messageList[i].imageHeight * 0.6 + 150
+        }
+        this.$store.commit('setMessageList', messageList)
+        var list = messageList.slice(0, 20)
+        this.messageArrayList = split(list, 4)
+      })
+    },
+    getData (datas) {
+      var messageVO = {}
+      messageVO.userId = this.$store.getters.getUserData.id
+      messageVO.messageTabs = datas
+      getTabAllMessage(messageVO).then((response) => {
+        var messageList = response.data.data
+        for (var i in messageList) {
+          messageList[i].imageHeight = messageList[i].imageHeight * 0.6 + 150
         }
         this.$store.commit('setMessageList', messageList)
         this.messageArrayList = split(messageList, 4)
       })
     },
-    getData (datas) {
+    getDuanziData (datas) {
       var messageVO = {}
-      this.messageArrayList = []
+      messageVO.userId = this.$store.getters.getUserData.id
       messageVO.messageTabs = datas
       getTabAllMessage(messageVO).then((response) => {
         var messageList = response.data.data
         for (var i in messageList) {
-          messageList[i].imageHeight = messageList[i].imageHeight * 0.55 + 135
-          messageList[i].isPraise = false
-          messageList[i].isCollection = false
+          messageList[i].imageHeight = messageList[i].imageHeight * 0.6 + 240
         }
         this.$store.commit('setMessageList', messageList)
         this.messageArrayList = split(messageList, 4)
@@ -308,24 +354,48 @@ export default {
     showCarePerson () {
       this.$router.push({path: '/care'})
     },
-    addPraisePoint (item) {
-      if (item.isPraise) {
-        this.dianzanSytle.color = 'red'
+    addPraisePoint (index1, index2) {
+      if (localStorage.hasOwnProperty('userName')) {
+        var userData = {}
+        var user = this.$store.getters.getUserData
+        userData.id = user.id
+        userData.praiseList = user.praiseList + ',' + this.messageArrayList[index1][index2].messageId
+        addPraise(userData).then((response) => {
+          if (response.data.code === 1) {
+            this.messageArrayList[index1][index2].praisePoint++
+            this.messageArrayList[index1][index2].isPraise = '#ff0000'
+            this.$store.commit('addPraiseMessage', userData.praiseList)
+            this.$message({
+              message: '点赞!',
+              type: 'success',
+              center: true
+            })
+          } else {
+            this.$message({
+              message: '您已点赞过~',
+              type: 'error',
+              center: true
+            })
+          }
+        })
+      } else {
+        this.$message({
+          message: '请先登录!',
+          type: 'success',
+          center: true
+        })
+        this.$router.push({path: '/login'})
       }
-      item.isPraise = !item.isPraise
-      item.praisePoint++
-      var messageVO = {}
-      messageVO.messageId = item.messageId
-      addPraise(messageVO)
     },
-    addCollectionNum (item) {
+    addCollectionNum (index1, index2) {
       if (localStorage.hasOwnProperty('userName')) {
         var messageVO = {}
         messageVO.userId = this.$store.getters.getUserData.id
-        messageVO.messageId = item.messageId
+        messageVO.messageId = this.messageArrayList[index1][index2].messageId
         addCollection(messageVO).then((response) => {
           if (response.data.code === 1) {
-            item.collectionNumber++
+            this.messageArrayList[index1][index2].collectionNumber++
+            this.messageArrayList[index1][index2].isCollection = '#f17703'
             this.$message({
               message: '收藏成功!',
               type: 'success',
@@ -367,6 +437,11 @@ export default {
       this.$refs.slider.prev()
     },
     showSide () {
+      var user = {}
+      user.userName = localStorage.getItem('userName')
+      getUser(user).then((response) => {
+        this.$store.commit('setUserData', response.data.data)
+      })
       this.$store.dispatch('showSideBar')
     },
     hideSide () {
@@ -382,21 +457,29 @@ export default {
       this.$router.replace({path: '/admin'})
     },
     selectMenu (item) {
+      this.$store.commit('setTab', item)
+      this.messageArrayList = []
       if (item === '精选') {
-        this.getDatas()
+        setTimeout(this.getDatas(), 800)
       } else {
-        this.getData(item)
+        if (item === '段子') {
+          this.isDuanzi = true
+          setTimeout(this.getDuanziData(item), 800)
+        } else {
+          this.isDuanzi = false
+          setTimeout(this.getData(item), 800)
+        }
       }
     },
     search () {
       var messageVO = {}
       this.messageArrayList = []
+      messageVO.userId = this.$store.getters.getUserData.id
       messageVO.messageContent = this.searchWord
       search(messageVO).then((response) => {
         var messageList = response.data.data
         for (var i in messageList) {
-          messageList[i].imageHeight = messageList[i].imageHeight * 0.55 + 135
-          messageList[i].isPraise = false
+          messageList[i].imageHeight = messageList[i].imageHeight * 0.55 + 150
           messageList[i].isCollection = false
         }
         this.$store.commit('setMessageList', messageList)
@@ -514,7 +597,7 @@ body {
   top: 6px;
   left: 6px;
   right: 6px;
-  bottom: 0px;
+  bottom: 10px;
   font-size: 1.5em;
   color: rgb(0,158,107);
 }

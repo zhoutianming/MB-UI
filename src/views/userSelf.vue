@@ -109,6 +109,7 @@ export default {
       }).then(() => {
         var message = {}
         message.messageId = this.userMessage[index].messageId
+        message.messageImg = this.userMessage[index].messageImg
         deleteMessage(message).then((response) => {
           if (response.data.message === 'ok') {
             this.userMessage.splice(index, 1)

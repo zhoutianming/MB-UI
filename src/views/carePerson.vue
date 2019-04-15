@@ -18,7 +18,7 @@
             </div>
           </div>
         </div>
-        <el-button circle size="normal" type="primary" style="z-index:2;float:right;width:80px;margin-top:20px;margin-right:24px" @click="unfollow(item)">取消关注</el-button>
+        <el-button circle size="normal" type="primary" style="z-index:2;float:right;width:80px;margin-top:20px;margin-right:24px" @click="unfollow(index)">取消关注</el-button>
       </div>
     </div>
   </div>
@@ -71,10 +71,10 @@ export default {
       this.$store.commit('setCurrentUser', user)
       this.$router.push({path: '/userDetail'})
     },
-    unfollow (item) {
+    unfollow (index) {
       var carePersonDO = {}
       carePersonDO.userId = this.$store.getters.getUserData.id
-      carePersonDO.carePersonId = item.id
+      carePersonDO.carePersonId = this.careUserList[index].id
       unfollow(carePersonDO).then((response) => {
         if (response.data.code === 1) {
           this.$message({
@@ -82,11 +82,7 @@ export default {
             type: 'success',
             center: true
           })
-          for (var i in this.careUserList) {
-            if (this.careUserList[i].id === item.id) {
-              this.careUserList.splice(i, 1)
-            }
-          }
+          this.careUserList.splice(index, 1)
         }
       })
     }

@@ -28,10 +28,11 @@ export function register (query) {
 }
 
 // 获取所有留言内容
-export function getAllMessage () {
+export function getAllMessage (query) {
   return request({
     url: '/message/getAllMessage',
-    method: 'post'
+    method: 'post',
+    data: query
   })
 }
 
@@ -188,10 +189,19 @@ export function unfollow (query) {
   })
 }
 
-// 取消关注
+// 搜索
 export function search (query) {
   return request({
     url: '/message/search',
+    method: 'post',
+    data: query
+  })
+}
+
+// 取消关注
+export function unCollection (query) {
+  return request({
+    url: '/user/unCollection',
     method: 'post',
     data: query
   })
