@@ -9,7 +9,7 @@
     <div style="margin-top:35px">
       <div v-for="(item, index) in careUserList" :key="index" style="border-radius:10px;width:100%;height:80px;background:#d4d1cf;text-align:center;margin-top:10px">
         <div @click="showUserDetail(item)">
-          <avatar style="margin-top:4px;margin-left:6px;float:left" :fullname="item.userName" :image="item.headImg" :size="72"></avatar>
+          <avatar style="margin-top:4px;margin-left:6px;float:left" fullname="user" :image="item.headImg" :size="72"></avatar>
           <div style="float:left;text-align:left;margin-top:28px;margin-left:6px;">
             <div style="font-size:1em">{{item.userName}}</div>
             <div style="text-align:center;margin-bottom:10px">
@@ -79,6 +79,7 @@ export default {
         if (response.data.code === 1) {
           this.$message({
             message: '取消关注成功!',
+            customClass: 'messageTop',
             type: 'success',
             center: true
           })
@@ -102,5 +103,8 @@ export default {
     font-size: 14px;
     color: #999;
     border: none;
+}
+.messageTop{
+  margin-top:35px;
 }
 </style>

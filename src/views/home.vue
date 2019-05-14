@@ -10,7 +10,7 @@
       <!-- 主页头像内容 -->
       <div slot="left" style="margin-left:-10px;margin-top:-10px">
         <span @click="showSide" v-show="showUserIcon">
-          <avatar fullname="userName" :image="user.headImg" :size="40"></avatar>
+          <avatar fullname="user" :image="user.headImg" :size="40"></avatar>
         </span>
         <a style="margin-top:10px;color:green" @click="login" v-show="!showUserIcon">登录</a>
       </div>
@@ -20,6 +20,9 @@
         <div style="float:right;margin-top:8px">
           <x-icon style="color:black;" type="ios-search-strong" @click="search" size="30"></x-icon>
         </div>
+      </div>
+      <div slot="right" style="margin-left:-10px;margin-top:0px" v-show="!showUserIcon">
+        <i style="color:red;font-size:22px;" class="iconfont icon-tuichu" @click="plus.runtime.quit()"></i>
       </div>
     </x-header>
     <!-- 添加按钮 -->
@@ -36,7 +39,7 @@
         <!-- 这里才是侧栏代码部分 -->
         <div class="side-content" v-show="isShowside">
           <div class="head" @click="showUserSelf">
-            <avatar style="margin-top:10px" :fullname="user.userName" :image="user.headImg" :size="100"></avatar>
+            <avatar style="margin-top:10px" fullname="user" :image="user.headImg" :size="100"></avatar>
             <br>
             <span>{{user.userName}}</span>
           </div>
@@ -48,16 +51,16 @@
               <cell style="background:#d4d1cf;height:20px;color:#000000;" is-link @click.native="toPersonalCollection">
                 <span slot="title" style="">个人收藏({{user.collectionNum}})</span>
               </cell>
-              <cell style="background:#d4d1cf;height:20px;color:#000000;">
+              <cell style="background:#d4d1cf;height:20px;color:#000000;" @click.native="cancelShowCared">
                 <span slot="title" style="color:#000000;">
                   <span style="vertical-align:middle;">关注度({{user.beCaredNum}})</span>
-                  <badge text="+1"></badge>
+                  <badge :text="addCared" v-show="showCaredBadge"></badge>
                 </span>
               </cell>
-              <cell style="background:#d4d1cf;height:20px;color:#250101;">
+              <cell style="background:#d4d1cf;height:20px;color:#250101;" @click.native="cancelShowPraise">
                 <span slot="title" style="color:#000000;">
                   <span style="vertical-align:middle;">点赞数({{user.praisedNum}})</span>
-                  <badge text="+1"></badge>
+                  <badge :text="addPraise" v-show="showPraiseBadge"></badge>
                 </span>
               </cell>
             </group>
@@ -68,7 +71,7 @@
               <el-button type="text">注销</el-button>
             </div>
             <div @click="plus.runtime.quit()" style="float:right">
-              <i style="font-size:25px;" class="iconfont icon-tuichu"></i>
+              <i style="color:red;font-size:25px;" class="iconfont icon-tuichu"></i>
               <el-button type="text">退出</el-button>
             </div>
           </div>
@@ -82,6 +85,7 @@
         ref="slider"
         style="height:95%;z-index:9"
         animation="fade"
+        indicators=""
         :control-btn="false"
         :autoplay="false"
         v-model="sliderIndex"
@@ -92,61 +96,59 @@
           style="color:black;"
         >
         <!-- 左右翻页的内容 -->
-          <div style="width: 100%;height:100%;margin: 0px;">
-            <waterfall
-              :line="line"
-              :line-gap="line_gap"
-              :watch="messageArray"
-              ref="waterfall"
-              :fixed-height="true"
+          <waterfall
+            :line="line"
+            :line-gap="line_gap"
+            :watch="messageArray"
+            ref="waterfall"
+            :fixed-height="true"
+          >
+            <waterfall-slot
+              v-for="(item, index2) in messageArray"
+              :width="100"
+              :height="item.imageHeight"
+              :order="index2"
+              :key="item.messageId"
+              move-class="itemStyle-move"
             >
-              <waterfall-slot
-                v-for="(item, index2) in messageArray"
-                :width="100"
-                :height="item.imageHeight"
-                :order="index2"
-                :key="item.messageId"
-                move-class="itemStyle-move"
-              >
-                <!-- 瀑布流形式内容 -->
-                <div class="itemStyle" style="font-size: 0.2em">
-                  <el-card :body-style="{ padding: '0px' }" shadow="always" :style="cardStyle">
-                    <div style="width:90%;margin-left:5%;text-align:center" @click="showUserDetail(item)">
-                      <avatar fullname="My Sticker" :image="item.headImg" :size="30"></avatar>
-                      <span style="font-size:13px;">{{item.userName}}</span>
+              <!-- 瀑布流形式内容 -->
+              <div class="itemStyle" style="font-size: 0.2em">
+                <el-card :body-style="{ padding: '0px' }" shadow="always" :style="cardStyle">
+                  <div style="width:90%;margin-left:5%;text-align:center" @click="showUserDetail(item)">
+                    <avatar fullname="user" :image="item.headImg" :size="30"></avatar>
+                    <span style="font-size:13px;">{{item.userName}}</span>
+                  </div>
+                  <div style="width:100%;" @click="showMessageDetail(item)">
+                    <span v-show="isDuanzi" style="float:left;text-align:left;width:100%;height:140px;overflow:hidden;text-overflow: ellipsis;white-space: normal;font-size:13px;">
+                      {{item.messageContent}}
+                    </span>
+                    <span v-show="!isDuanzi" style="float:left;text-align:left;width:100%;height:24px;overflow:hidden;text-overflow: ellipsis;white-space: nowrap;font-size:13px;">
+                      {{item.messageContent}}
+                    </span>
+                    <div>
+                      <img :src="item.messageImg" style="width:100%;height:auto;display: block;">
                     </div>
-                    <div style="width:100%;" @click="showMessageDetail(item)">
-                      <span v-show="isDuanzi" style="float:left;text-align:left;width:100%;height:140px;overflow:hidden;text-overflow: ellipsis;white-space: normal;font-size:13px;">
-                        {{item.messageContent}}
-                      </span>
-                      <span v-show="!isDuanzi" style="float:left;text-align:left;width:100%;height:24px;overflow:hidden;text-overflow: ellipsis;white-space: nowrap;font-size:13px;">
-                        {{item.messageContent}}
-                      </span>
-                      <div>
-                        <img :src="item.messageImg" style="width:100%;height:auto;display: block;">
-                      </div>
+                  </div>
+                  <br>
+                  <div style="text-align:center;margin-bottom:10px;color:#000">
+                    <div>
+                      <span style="float:left;font-size:10px;color:#000;">{{item.time}}</span>
+                      <span style="float:right;font-size:10px">点击浏览{{item.pageViews}}次</span>
                     </div>
                     <br>
-                    <div style="text-align:center;margin-bottom:10px;color:#000">
-                      <div>
-                        <span style="float:left;font-size:10px;color:#000;">{{item.time}}</span>
-                        <span style="float:right;font-size:10px">点击浏览{{item.pageViews}}次</span>
-                      </div>
-                      <br>
-                      <div style="width:100%;margin-top:10px;">
-                        <i :style="{font_size: '13px',margin_left: '0px',color:item.isPraise}" class="iconfont icon-dianzan1" @click="addPraisePoint(index1, index2)"></i>
-                        <span style="font-size:10px">{{item.praisePoint}}</span>
-                        <i :style="{font_size:'13px',margin_left:'5px',color: item.isCollection}" class="iconfont icon-shoucang" @click="addCollectionNum(index1,index2)"></i>
-                        <span style="font-size:10px">{{item.collectionNumber}}</span>
-                        <i style="font-size:13px;margin-left:5px" class="iconfont icon-tubiaozhizuomobanyihuifu-" @click="showMessageDetail(item)"></i>
-                        <span style="font-size:10px">{{item.reviewNumber}}</span>
-                      </div>
+                    <div style="width:100%;margin-top:10px;">
+                      <i :style="{font_size: '13px',margin_left: '0px',color:item.isPraise}" class="iconfont icon-dianzan1" @click="addPraisePoint(index1, index2)"></i>
+                      <span style="font-size:10px">{{item.praisePoint}}</span>
+                      <i :style="{font_size:'13px',margin_left:'5px',color: item.isCollection}" class="iconfont icon-shoucang" @click="addCollectionNum(index1,index2)"></i>
+                      <span style="font-size:10px">{{item.collectionNumber}}</span>
+                      <i style="font-size:13px;margin-left:5px" class="iconfont icon-tubiaozhizuomobanyihuifu-" @click="showMessageDetail(item)"></i>
+                      <span style="font-size:10px">{{item.reviewNumber}}</span>
                     </div>
-                  </el-card>
-                </div>
-              </waterfall-slot>
-            </waterfall>
-          </div>
+                  </div>
+                </el-card>
+              </div>
+            </waterfall-slot>
+          </waterfall>
         </SliderItem>
       </Slider>
     </v-touch>
@@ -170,7 +172,7 @@
 
 <script>
 import {Cell, Group, XHeader, XButton, Badge, Tab, TabItem} from 'vux'
-import {getTabAllMessage, getAllMessage, getUser, addPraise, addView, addCollection, search} from '@/api'
+import {getTabAllMessage, getAllMessage, getUser, addPraise, addView, addCollection, search, cancelShowC, cancelShowP} from '@/api'
 import {split} from '@/util/splitArray'
 
 export default {
@@ -186,21 +188,13 @@ export default {
   name: 'home',
   data () {
     return {
+      currentTab: '精选',
       sliderIndex: Number,
       line: 'v',
       line_gap: 100,
       conheight: {
         height: '',
         background: '#c8e4da'
-      },
-      option: {
-        effect: 'nest',
-        currentPage: 1,
-        direction: 'horizontal',
-        pagination: true,
-        thresholdDistance: 50,
-        thresholdTime: 300,
-        loop: true
       },
       messageArrayList: [],
       messageTabs: '',
@@ -221,7 +215,11 @@ export default {
         font_size: '13px',
         margin_left: '5px',
         color: '#ffffff'
-      }
+      },
+      showPraiseBadge: false,
+      showCaredBadge: false,
+      addPraise: '+' + this.$store.getters.getUserData.praiseAdditions,
+      addCared: '+' + this.$store.getters.getUserData.caredAdditions
     }
   },
   created () {
@@ -249,11 +247,11 @@ export default {
     this.getHeight()
     window.addEventListener('resize', this.getWidth)
     this.getWidth()
-    this.sliderIndex = this.$store.getters.getCurrent
+    this.sliderIndex = Number(localStorage.getItem(item))
     this.$store.dispatch('hideSideBar')
   },
   destroyed () {
-    this.$store.commit('setCurrent', this.sliderIndex)
+    localStorage.setItem(this.currentTab, this.sliderIndex)
   },
   computed: {
     isShowside () {
@@ -273,10 +271,16 @@ export default {
     }
   },
   mounted () {
-    /* 页面挂载获取cookie，如果存在username的cookie，则跳转到主页，不需登录 */
     if (localStorage.hasOwnProperty('userName')) {
       this.$router.push({path: '/'})
       this.$store.dispatch('login')
+    }
+    var user = this.$store.getters.getUserData
+    if (user.praiseAdditions !== 0) {
+      this.showPraiseBadge = true
+    }
+    if (user.caredAdditions !== 0) {
+      this.showCaredBadge = true
     }
   },
   methods: {
@@ -323,7 +327,17 @@ export default {
       this.$router.push({path: '/login'})
     },
     addMessage () {
-      this.$router.push({path: '/add'})
+      if (localStorage.hasOwnProperty('userName')) {
+        this.$router.push({path: '/add'})
+      } else {
+        this.$message({
+          message: '请先登录!',
+          customClass: 'messageTop',
+          type: 'success',
+          center: true
+        })
+        this.$router.push({path: '/login'})
+      }
     },
     showUserDetail (item) {
       if (item.userId === this.$store.getters.getUserData.id) {
@@ -360,6 +374,7 @@ export default {
         var user = this.$store.getters.getUserData
         userData.id = user.id
         userData.praiseList = user.praiseList + ',' + this.messageArrayList[index1][index2].messageId
+        userData.praisedUserId = this.messageArrayList[index1][index2].userId
         addPraise(userData).then((response) => {
           if (response.data.code === 1) {
             this.messageArrayList[index1][index2].praisePoint++
@@ -368,11 +383,13 @@ export default {
             this.$message({
               message: '点赞!',
               type: 'success',
+              customClass: 'messageTop',
               center: true
             })
           } else {
             this.$message({
               message: '您已点赞过~',
+              customClass: 'messageTop',
               type: 'error',
               center: true
             })
@@ -382,6 +399,7 @@ export default {
         this.$message({
           message: '请先登录!',
           type: 'success',
+          customClass: 'messageTop',
           center: true
         })
         this.$router.push({path: '/login'})
@@ -399,17 +417,20 @@ export default {
             this.$message({
               message: '收藏成功!',
               type: 'success',
+              customClass: 'messageTop',
               center: true
             })
           } else if (response.data.code === -1) {
             this.$message({
               message: '您已收藏留言!',
+              customClass: 'messageTop',
               type: 'error',
               center: true
             })
           } else {
             this.$message({
               message: '收藏失败!',
+              customClass: 'messageTop',
               type: 'error',
               center: true
             })
@@ -418,6 +439,7 @@ export default {
       } else {
         this.$message({
           message: '请先登录!',
+          customClass: 'messageTop',
           type: 'success',
           center: true
         })
@@ -457,7 +479,9 @@ export default {
       this.$router.replace({path: '/admin'})
     },
     selectMenu (item) {
+      localStorage.setItem(this.currentTab, this.sliderIndex)
       this.$store.commit('setTab', item)
+      this.sliderIndex = Number(localStorage.getItem(item))
       this.messageArrayList = []
       if (item === '精选') {
         setTimeout(this.getDatas(), 800)
@@ -470,6 +494,7 @@ export default {
           setTimeout(this.getData(item), 800)
         }
       }
+      this.currentTab = item
     },
     search () {
       var messageVO = {}
@@ -493,6 +518,18 @@ export default {
       } else {
         return this.getRandomColor()
       }
+    },
+    cancelShowCared () {
+      this.showCaredBadge = false
+      var userVO = {}
+      userVO.userId = this.$store.getters.getUserData.id
+      cancelShowC(userVO)
+    },
+    cancelShowPraise () {
+      this.showPraiseBadge = false
+      var userVO = {}
+      userVO.userId = this.$store.getters.getUserData.id
+      cancelShowP(userVO)
     }
   }
 }
@@ -634,5 +671,8 @@ body {
   overflow:hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.messageTop{
+  margin-top:35px;
 }
 </style>

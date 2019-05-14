@@ -101,6 +101,12 @@ export default {
         messageData1.append('userId', this.$store.getters.getUserData.id)
         messageData1.append('messageTabs', this.messageTabs)
         addMessage(messageData1).then(response => {
+          this.$message({
+            message: '登录成功!',
+            customClass: 'messageTop',
+            type: 'success',
+            center: true
+          })
           var message = response.data.data
           message.headImg = this.$store.getters.getUserData.headImg
           message.userName = this.$store.getters.getUserData.userName
@@ -124,6 +130,12 @@ export default {
         messageData.append('imageHeight', imageHeight)
         messageData.append('messageTabs', this.messageTabs)
         addMessage(messageData).then(response => {
+          this.$message({
+            message: '发布成功!',
+            customClass: 'messageTop',
+            type: 'success',
+            center: true
+          })
           var message = response.data.data
           message.headImg = this.$store.getters.getUserData.headImg
           message.userName = this.$store.getters.getUserData.userName
@@ -152,5 +164,8 @@ export default {
 .item-selected {
   background: #65b0f3;
   border-color: #ff4a00;
+}
+.messageTop{
+  margin-top:35px;
 }
 </style>

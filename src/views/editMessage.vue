@@ -92,6 +92,7 @@ export default {
           if (response.data.code === 1) {
             this.$message({
               message: '修改成功!',
+              customClass: 'messageTop',
               type: 'success',
               center: true
             })
@@ -99,6 +100,7 @@ export default {
           } else {
             this.$message({
               message: '修改发生错误!',
+              customClass: 'messageTop',
               type: 'error',
               center: true
             })
@@ -123,6 +125,7 @@ export default {
           if (response.data.code === 1) {
             this.$message({
               message: '修改成功!',
+              customClass: 'messageTop',
               type: 'success',
               center: true
             })
@@ -130,6 +133,7 @@ export default {
           } else {
             this.$message({
               message: '修改发生错误!',
+              customClass: 'messageTop',
               type: 'error',
               center: true
             })
@@ -142,5 +146,7 @@ export default {
 </script>
 
 <style>
-
+.messageTop{
+  margin-top:35px;
+}
 </style>

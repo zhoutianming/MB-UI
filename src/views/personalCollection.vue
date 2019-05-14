@@ -8,17 +8,17 @@
     <br>
     <div style="margin-top:28px">
       <div v-for="(item, index) in userCollectionMessage" :key="index" style="width:100%;height:80px;background:#8bceb6;text-align:center;margin-top:3px">
-        <img :src="item.messageImg" style="float:left;width:10%;height:66px;margin-left:1%;margin-top:8px;display: block;" @click="showMessageDetail(item)">
-        <el-button size="small" type="text" style="color:#af1f1f;border-radius:10px;z-index:2;float:right;width:23%;margin-top:20px;margin-right:5px" @click="unCollection(index)">取消收藏</el-button>
-        <div style="float:right;width:60%" @click="showMessageDetail(item)">
+        <img :src="item.messageImg" style="float:left;width:20%;height:66px;margin-left:1%;margin-top:8px;display: block;" @click="showMessageDetail(item)">
+        <el-button size="small" type="text" style="color:#af1f1f;border-radius:10px;z-index:2;float:right;width:14%;margin-top:20px;margin-right:5px" @click="unCollection(index)">取消收藏</el-button>
+        <div style="float:right;width:62%" @click="showMessageDetail(item)">
           <span style="float:right;text-align:left;width:98%;overflow:hidden;text-overflow:ellipsis;white-space: nowrap;">
             {{item.messageContent}}
           </span>
-          <div style="float:right;text-align:left;margin-top:20px;margin-right:11px">
-            <avatar style="float:left" :fullname="item.userName" :image="item.headImg" :size="30"></avatar>
-            <div style="float:right;font-size:1em">{{item.userName}}</div>
+          <div style="width:50%;float:right;text-align:left;margin-top:20px;margin-right:11px">
+            <avatar style="float:left" fullname="user" :image="item.headImg" :size="30"></avatar>
+            <div style="float:right;text-align:left;width:76%;overflow:hidden;text-overflow:ellipsis;white-space: nowrap;font-size:1em">{{item.userName}}</div>
           </div>
-          <span style="float:left;font-size:0.6em;margin-left:10px;margin-top:33px">{{item.time}}</span>
+          <span style="float:left;font-size:0.6em;margin-left:10px;margin-top:30px">{{item.time}}</span>
         </div>
       </div>
     </div>
@@ -79,12 +79,14 @@ export default {
             this.userMessage.splice(index, 1)
             this.$message({
               type: 'success',
+              customClass: 'messageTop',
               message: '删除成功!'
             })
           }
         })
       }).catch(() => {
         this.$message({
+          customClass: 'messageTop',
           type: 'info',
           message: '已取消删除'
         })
@@ -111,6 +113,7 @@ export default {
           localStorage.setItem('celloctionColor', '#ffffff')
           this.$message({
             message: '取消收藏成功!',
+            customClass: 'messageTop',
             type: 'success',
             center: true
           })
@@ -122,5 +125,7 @@ export default {
 </script>
 
 <style scoped>
-
+.messageTop{
+  margin-top:35px;
+}
 </style>

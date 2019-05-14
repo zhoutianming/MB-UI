@@ -6,7 +6,7 @@
       <x-icon slot="overwrite-left" type="ios-arrow-back" size="30" style="fill:#000000;position:relative;top:-8px;left:-3px;" @click="backspace"></x-icon>
     </x-header>
     <div style="height:auto;background:#edff008a;text-align:center;padding:10px">
-      <avatar style="margin-top:50px" :fullname="thisUser.userName" :image="thisUser.headImg" :size="150"></avatar>
+      <avatar style="margin-top:50px" fullname="user" :image="thisUser.headImg" :size="150"></avatar>
       <br>
       <span style="font-size:24px">{{thisUser.userName}}</span>
       <br><br>
@@ -104,8 +104,6 @@ export default {
   created () {
     this.getMessage()
   },
-  mounted: {
-  },
   methods: {
     backspace () {
       this.$router.go(-1)
@@ -126,34 +124,50 @@ export default {
       this.$router.push({path: '/messageDetail'})
     },
     addAttention () {
-      var carePersonDO = {}
-      carePersonDO.userId = this.$store.getters.getUserData.id
-      carePersonDO.carePersonId = this.thisUser.userId
-      addCare(carePersonDO).then((response) => {
-        if (response.data.code === 1) {
-          this.$message({
-            message: '关注成功!',
-            type: 'success',
-            center: true
-          })
-        } else if (response.data.code === -1) {
-          this.$message({
-            message: '您已关注过Ta了哦!',
-            type: 'info',
-            center: true
-          })
-        } else {
-          this.$message({
-            message: '关注失败了!',
-            type: 'error',
-            center: true
-          })
-        }
-      })
+      if (localStorage.hasOwnProperty('userName')) {
+        var carePersonDO = {}
+        carePersonDO.userId = this.$store.getters.getUserData.id
+        carePersonDO.carePersonId = this.thisUser.userId
+        addCare(carePersonDO).then((response) => {
+          if (response.data.code === 1) {
+            this.$message({
+              message: '关注成功!',
+              customClass: 'messageTop',
+              type: 'success',
+              center: true
+            })
+          } else if (response.data.code === -1) {
+            this.$message({
+              message: '您已关注过Ta了哦!',
+              customClass: 'messageTop',
+              type: 'info',
+              center: true
+            })
+          } else {
+            this.$message({
+              message: '关注失败了!',
+              customClass: 'messageTop',
+              type: 'error',
+              center: true
+            })
+          }
+        })
+      } else {
+        this.$message({
+          message: '请先登录!',
+          customClass: 'messageTop',
+          type: 'success',
+          center: true
+        })
+        this.$router.push({path: '/login'})
+      }
     }
   }
 }
 </script>
 
 <style scoped>
+.messageTop{
+  margin-top:35px;
+}
 </style>

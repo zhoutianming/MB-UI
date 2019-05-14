@@ -4,7 +4,7 @@
     <x-header style="width:100%;background:#8bceb6;height:49px;position:fixed;margin-top:-1px">
       <x-icon slot="overwrite-left" type="ios-arrow-back" size="30" style="fill:#000000;position:relative;top:-8px;left:-3px;" @click="backspace"></x-icon>
       <div style="text-align:center" @click="showUserDetail(message)">
-        <avatar style="" :fullname="message.userName" :image="message.headImg" :size="35"></avatar>
+        <avatar style="" fullname="user" :image="message.headImg" :size="35"></avatar>
         <span style="margin-top:-2px;color:#000000">{{message.userName}}</span>
       </div>
     </x-header>
@@ -39,7 +39,7 @@
       <div style="width:90%;height:auto;margin-left:5%;margin-top:20px;margin-bottom:65px" v-show="showMarkerPage">
         <div v-for="(review, index) in reviewList" :key="index" class="review" @click="showPlusMarkPage(review)">
           <div @click="showUserDetail(review)" style="float:left">
-            <avatar :fullname="review.userName" :image="review.headImg" :size="25"></avatar>
+            <avatar fullname="user" :image="review.headImg" :size="25"></avatar>
             <div style="margin-left:6px;margin-top:4px;float:right;font-size:0.8em">{{review.userName}}:</div>
           </div>
           <div style="margin-left:5%;width:90%;float:left;overflow:hidden;text-overflow: ellipsis;white-space: normal;text-align:left;font-size:0.9em">
@@ -76,7 +76,7 @@
         </div>
         <div slot="footer" class="dialog-footer" style="opacity:1">
           <el-button style="background:#b5b29c;float:left;width:40%" @click="isShowMarkPage = false">取 消</el-button>
-          <el-button style="background:#0000ff;float:right;width:40%" type="primary" @click="userReview">评论</el-button>
+          <el-button style="background:#2886ff;float:right;width:40%" type="primary" @click="userReview">评论</el-button>
         </div>
       </el-dialog>
       <!-- 评论的评论界面 -->
@@ -101,7 +101,7 @@
         </div>
         <div slot="footer" class="dialog-footer" style="opacity:1">
           <el-button style="background:#b5b29c;float:left;width:40%" @click="isShowReviewPage = false">取 消</el-button>
-          <el-button style="background:#0000ff;float:right;width:40%" type="primary" @click="addReviewPlus">评论</el-button>
+          <el-button style="background:#2886ff;float:right;width:40%" type="primary" @click="addReviewPlus">评论</el-button>
         </div>
       </el-dialog>
     </div>
@@ -184,6 +184,7 @@ export default {
       } else {
         this.$message({
           message: '请先登录!',
+          customClass: 'messageTop',
           type: 'success',
           center: true
         })
@@ -196,6 +197,7 @@ export default {
         var user = this.$store.getters.getUserData
         userData.id = user.id
         userData.praiseList = user.praiseList + ',' + message.messageId
+        userData.praisedUserId = message.userId
         addPraise(userData).then((response) => {
           if (response.data.code === 1) {
             message.praisePoint++
@@ -203,11 +205,13 @@ export default {
             this.$store.commit('addPraiseMessage', userData.praiseList)
             this.$message({
               message: '点赞!',
+              customClass: 'messageTop',
               type: 'success',
               center: true
             })
           } else {
             this.$message({
+              customClass: 'messageTop',
               message: '您已点赞过~',
               type: 'error',
               center: true
@@ -216,6 +220,7 @@ export default {
         })
       } else {
         this.$message({
+          customClass: 'messageTop',
           message: '请先登录!',
           type: 'success',
           center: true
@@ -233,6 +238,7 @@ export default {
             message.collectionNumber++
             message.isCollection = '#f17703'
             this.$message({
+              customClass: 'messageTop',
               message: '收藏成功!',
               type: 'success',
               center: true
@@ -240,12 +246,14 @@ export default {
           } else if (response.data.code === -1) {
             this.$message({
               message: '您已收藏留言!',
+              customClass: 'messageTop',
               type: 'error',
               center: true
             })
           } else {
             this.$message({
               message: '收藏失败!',
+              customClass: 'messageTop',
               type: 'error',
               center: true
             })
@@ -254,6 +262,7 @@ export default {
       } else {
         this.$message({
           message: '请先登录!',
+          customClass: 'messageTop',
           type: 'success',
           center: true
         })
@@ -279,6 +288,7 @@ export default {
       } else {
         this.$message({
           message: '请输入评论内容！',
+          customClass: 'messageTop',
           type: 'warn',
           center: true
         })
@@ -291,6 +301,7 @@ export default {
       } else {
         this.$message({
           message: '请先登录!',
+          customClass: 'messageTop',
           type: 'success',
           center: true
         })
@@ -324,6 +335,7 @@ export default {
         this.$message({
           message: '请输入评论内容！',
           type: 'warn',
+          customClass: 'messageTop',
           center: true
         })
       }
@@ -349,5 +361,8 @@ margin-left:10%;
 width:80%;
 max-height:500px;
 overflow: hidden
+}
+.messageTop{
+  margin-top:35px;
 }
 </style>

@@ -5,12 +5,15 @@ Vue.use(Vuex)
 const state = {
   isShow: false,
   showUserIcon: false,
-  userData: {},
+  userData: {
+    praiseAdditions: 0,
+    caredAdditions: 0
+  },
   messageList: [],
   currentPage: 0,
   currentUser: {},
   currentMessage: {},
-  headbgcolor: '',
+  headbgcolor: '#9bbbbb',
   tab: '精选'
 }
 

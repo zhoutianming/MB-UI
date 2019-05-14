@@ -108,6 +108,15 @@ export function editUser (query) {
   })
 }
 
+// 修改密码
+export function editPassword (query) {
+  return request({
+    url: '/user/editPassword',
+    method: 'post',
+    data: query
+  })
+}
+
 // 点赞
 export function addPraise (query) {
   return request({
@@ -202,6 +211,24 @@ export function search (query) {
 export function unCollection (query) {
   return request({
     url: '/user/unCollection',
+    method: 'post',
+    data: query
+  })
+}
+
+// 取消关注增长数
+export function cancelShowC (query) {
+  return request({
+    url: '/user/cancelShowCared',
+    method: 'post',
+    data: query
+  })
+}
+
+// 取消点赞增长数
+export function cancelShowP (query) {
+  return request({
+    url: '/user/cancelShowPraise',
     method: 'post',
     data: query
   })
